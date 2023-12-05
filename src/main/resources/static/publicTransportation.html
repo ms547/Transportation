@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<title>Public Trasportation</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="./publicTransportation.js"></script>
+<style>
+    .bg-img {
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background: url(backWall.jpg);
+        background-size: cover;
+    }
+
+    .text-navyblue {
+        color: #366891;
+    }
+
+    .bg-navyblue {
+        background-color: #366891;
+        color: #fff;
+    }
+
+    .border-input {
+        box-sizing: border-box;
+        border: none;
+        border-bottom: 2px solid #f2e8e8;
+        background-color: transparent;
+    }
+</style>
+
+<body ng-app="myApp" ng-controller="myCtrl" ng-init="onload();" class="bg-img">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #366891;">
+        <img src="./logo.jpg" alt="" style="height: 54px;">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+            aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active menuCls" id="routeDetails" menuType="ROUTE_TICKET_DETAILS">
+                    <a class="nav-link" href="#"
+                        ng-click="switchMenu('ROUTE_TICKET_DETAILS','routeDetails')">Ticket/Route Details</a>
+                </li>
+                <li class="nav-item menuCls" ng-if="loginUserDetails.userType =='MANAGER'" id="menuTabId"
+                    menuType="MENU">
+                    <a class="nav-link" href="#" ng-click="switchMenu('MENU','menuTabId')">Vehicle Details</a>
+                </li>
+                <li class="nav-item menuCls" ng-if="loginUserDetails.userType =='MANAGER'" menuType="ADD_VEHICLE"
+                    id="addVehicleTabId">
+                    <a class="nav-link" href="#" ng-click="switchMenu('ADD_VEHICLE','addVehicleTabId')">Add
+                        New Vehicle</a>
+                </li>
+                <li class="nav-item menuCls" ng-if="loginUserDetails.userType =='MANAGER'" menuType="ADD_ROUTE"
+                    id="addRouteTabId">
+                    <a class="nav-link" href="#" ng-click="switchMenu('ADD_ROUTE','addRouteTabId')">Add
+                        Route/Ticket</a>
+                </li>
+
+                <li class="nav-item menuCls" menuType="HISTORY" id="orderHistoryTabId">
+                    <a class="nav-link" href="#" ng-click="switchMenu('HISTORY','orderHistoryTabId')">Purchased
+                        Tickets</a>
+                </li>
+            </ul>
+            <span class="navbar-text" style="cursor: pointer;">
+                <i class="fa fa-sign-out" title="Logout" style="font-size: 20px;" ng-click="logout()"></i>
+            </span>
+        </div>
+    </nav>
+    <!-- VEHICLE_LIST -->
+    <div id="vehicleListDivId" style="margin: 12px 12px 0 12px;">
+        <div class="row">
+            <table class="table">
+                <thead class="text-gray">
+                    <tr>
+                        <th scope="col">Vehicle Name</th>
+                        <th scope="col">Vehicle No.</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="data in vehicleList">
+                        <td scope="col" class="text-gray">{{data.vehicleName}}</td>
+                        <td scope="col" class="text-gray">{{data.noPlateNumId}}</td>
+                        <td scope="col" class="text-gray">{{data.descriptionId}}</td>
+                        <td scope="col" class="text-gray">
+                            <button ng-click="removeVehicle(data)" class="btn btn-info">Remove
+                                Vehicle</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    <!--  Add Vehicle  -->
+    <div class="col-md-5 justify-content-center" style="margin-left: 27%;" id="iteamAddDivId">
+        <form class="mt-3">
+            <div class="form-group">
+                <input type="text" class="form-control border-input" id="vehicleNameId"
+                    placeholder="Enter Vehicle Name">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control border-input" id="noPlateNumId" placeholder="Enter Vehicle no.">
+            </div>
+            <div class="form-group">
+                <textarea class="form-control border-input" id="descriptionId"
+                    placeholder="Enter Description"></textarea>
+            </div>
+            <button type="button" class="btn btn-info btn-block" ng-click="addVehicle()">Add</button>
+        </form>
+    </div>
+    <!--  Add Rout/Ticket  -->
+    <div class="col-md-5 justify-content-center" style="margin-left: 27%;" id="routeTicketAddDivId">
+        <form class="mt-3">
+            <div class="form-group">
+                <label for="">Route Name</label>
+                <input type="text" class="form-control border-input" ng-model="routeDetails.routeName" placeholder="">
+            </div>
+            <div class="form-group">
+                <label for="">Select Vehicle</label>
+                <select type="text" class="form-control border-input" ng-model="routeDetails.vehicleName"
+                    ng-options="data.vehicleName for data in vehicleList">
+                    <option value="">Select Vehicle</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="">Pick Time</label>
+                <input type="time" class="form-control border-input" ng-model="routeDetails.pickTime" placeholder="">
+            </div>
+            <div class="form-group">
+                <label for="">Arrive Time</label>
+                <input type="time" class="form-control border-input" ng-model="routeDetails.arriveTime"
+                    placeholder="Arrive Time">
+            </div>
+            <div class="form-group">
+                <label for="">Ticket Price</label>
+                <input type="number" class="form-control border-input" ng-model="routeDetails.priceId" placeholder="">
+            </div>
+
+            <button type="button" class="btn btn-info btn-block" ng-click="addRouteTicket()">Add</button>
+            <button type="reset" class="btn  btn-block">Clear</button>
+        </form>
+    </div>
+    <!-- TICKET_ROUTE_DETAILS -->
+    <div id="routeTicketDetailsDivId" style="margin: 12px 12px 0 12px;">
+        <div class="row">
+            <table class="table">
+                <thead class="text-gray">
+                    <tr>
+                        <th scope="col">Route Name</th>
+                        <th scope="col">Vehicle Name</th>
+                        <th scope="col">Vehicle No.</th>
+                        <th scope="col">Pick Time</th>
+                        <th scope="col">Arrive Time</th>
+                        <th scope="col">Ticket Price</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="data in routeList">
+                        <td scope="col" class="text-gray">{{data.routeName}}</td>
+                        <td scope="col" class="text-gray">{{data.vehicleName.vehicleName}}</td>
+                        <td scope="col" class="text-gray">{{data.vehicleName.noPlateNumId}}</td>
+                        <td scope="col" class="text-gray">{{data.pickTime.split("T")[1].split(".")[0]}}</td>
+                        <td scope="col" class="text-gray">{{data.arriveTime.split("T")[1].split(".")[0]}}</td>
+                        <td scope="col" class="text-gray">{{data.priceId}}</td>
+                        <td><button ng-if="loginUserDetails.userType !='MANAGER'" class="btn btn-info"
+                                ng-click="getOrderData(data)" data-toggle="modal" data-target="#purchaseTicket">Purchase
+                                Ticket</button>
+                            <button ng-if="loginUserDetails.userType =='MANAGER'" ng-click="removeRoute(data)"
+                                class="btn btn-info">Remove</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Book Ticket-->
+            <div class="modal fade" id="purchaseTicket">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header bg-navyblue">
+                            <h4 class="modal-title text-gray">Purchase Ticket</h4>
+                            <button type="button" class="close" data-dismiss="modal">×</button>
+                        </div>
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <form>
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label>Person Name</label>
+                                        <input type="text" class="form-control" id="noOfTicket"
+                                            ng-model="ticketPurchase.personName" value="">
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label>No. of Ticket</label>
+                                        <input type="number" class="form-control" id="noOfTicket"
+                                            ng-model="ticketPurchase.noOfTicket" value="">
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="ammountId">Total Cost</label>
+                                        <input type="text" class="form-control" id="ticketCosttId"
+                                            value="{{ticketPurchase.noOfTicket * orderDetails.priceId}}" readonly>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="paymentModeId">Payment Mode</label>
+                                        <select class="form-control" ng-model="ticketPurchase.paymentModeId">
+                                            <option value="">Select</option>
+                                            <option value="Cash Payment">Cash</option>
+                                            <option value="Credit Card Payment">Credit Card</option>
+                                            <option value="Debit Card Payment">Debit Card</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="reset" class="border btn btn-light" data-dismiss="modal">Close</button>
+                            <button type="button" class="border btn bg-navyblue"
+                                ng-click="purchaseTicket()">Purchase</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Purchase Details -->
+    <div class="col-md-12" id="purchaseTicketId">
+        <table class="table">
+            <thead class="text-gray">
+                <tr>
+                    <th scope="col">Person Name</th>
+                    <th scope="col">No. of Ticket</th>
+                    <th scope="col">Total Cost</th>
+                    <th scope="col">Payment Mode</th>
+                    <th scope="col">Purchase Date</th>
+                    <th scope="col">Route Name</th>
+                    <th scope="col">Vehicle Name</th>
+                    <th scope="col">Vehicle No.</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="data in purchaseList">
+                    <td scope="col" class="text-gray">{{data.personName}}</td>
+                    <td scope="col" class="text-gray">{{data.noOfTicket}}</td>
+                    <td scope="col" class="text-gray">{{data.ticketCosttId}}</td>
+                    <td scope="col" class="text-gray">{{data.paymentModeId}}</td>
+                    <td scope="col" class="text-gray">{{data.purchaseDate}}</td>
+                    <td scope="col" class="text-gray">{{data.routeDetails.routeName}}</td>
+                    <td scope="col" class="text-gray">{{data.routeDetails.vehicleName.vehicleName}}</td>
+                    <td scope="col" class="text-gray">{{data.routeDetails.vehicleName.noPlateNumId}}</td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
